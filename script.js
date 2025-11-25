@@ -9,20 +9,21 @@ const highScoreElement = document.querySelector("#high-score");
 const scoreElement = document.querySelector("#score");
 const timeElement = document.querySelector("#time");
 
-const blockHeight = 50;
-const blockWidth = 50;
+const blockHeight = 20;
+const blockWidth = 20;
 
 let highScore = parseInt(localStorage.getItem("highScore")) || 0;
 let score = 0;
 let time = `00-00`;
 
-highScoreElement.innerText = highScore
+highScoreElement.innerText = highScore;
 
 const cols = Math.floor(board.clientWidth / blockWidth);
 const rows = Math.floor(board.clientHeight / blockHeight);
 
 let intervalId = null;
 let timerIntervalId = null;
+let speed = 100;
 
 let food = {
   x: Math.floor(Math.random() * rows),
@@ -47,6 +48,18 @@ for (let row = 0; row < rows; row++) {
     blocks[`${row}-${col}`] = block;
   }
 }
+
+// // speed increasing logic
+// if (score > 200) {
+//   speed -= 10;
+// } else if (score > 150) {
+//   speed -= 10;
+// } else if (score > 100) {
+//   speed -= 10;
+// } else if (score > 50) {
+//   speed -= 10;
+//   console.log(speed);
+// }
 
 function render() {
   let head = null;
@@ -97,10 +110,18 @@ function render() {
     };
     blocks[`${food.x}-${food.y}`].classList.add("food");
 
-    score += 10
-    scoreElement.innerText = score
+    score += 10;
+    scoreElement.innerText = score;
 
-    if(score>highScore) {
+    // speed increase
+    if (score === 50 || score === 100 || score === 150 || score === 200 || score === 220 || score === 260 || score === 300) {
+      speed -= 10;
+      console.log(speed)
+      clearInterval(intervalId);
+      intervalId = setInterval(render, speed); 
+    }
+
+    if (score > highScore) {
       highScore = score;
       localStorage.setItem("highScore", highScore.toString());
       highScoreElement.innerText = highScore;
@@ -123,20 +144,20 @@ startButton.addEventListener("click", () => {
   modal.style.display = "none";
   intervalId = setInterval(() => {
     render();
-  }, 300);
+  }, speed);
   timerIntervalId = setInterval(() => {
-    let [min, sec] = time.split("-").map(Number)
+    let [min, sec] = time.split("-").map(Number);
 
-    if (sec == 59){
-      min+= 1
-      sec=0
+    if (sec == 59) {
+      min += 1;
+      sec = 0;
     } else {
-      sec+=1
+      sec += 1;
     }
 
-    time = `${min}-${sec}`
+    time = `${min}-${sec}`;
     timeElement.innerText = time;
-  }, 1000)
+  }, 1000);
 });
 
 restartButton.addEventListener("click", restartGame);
@@ -146,12 +167,13 @@ function restartGame() {
   snake.forEach((segment) => {
     blocks[`${segment.x}-${segment.y}`].classList.remove("fill");
   });
-  score = 0
-  time = `00-00`
+  score = 0;
+  time = `00-00`;
+  speed = 100
 
-  scoreElement.innerText = score
-  timeElement.innerText = time
-  highScoreElement.innerText = highScore
+  scoreElement.innerText = score;
+  timeElement.innerText = time;
+  highScoreElement.innerText = highScore;
 
   modal.style.display = "none";
   direction = "down";
@@ -162,7 +184,7 @@ function restartGame() {
   };
   intervalId = setInterval(() => {
     render();
-  }, 300);
+  }, speed);
 }
 
 window.addEventListener("keydown", (event) => {
